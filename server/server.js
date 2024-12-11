@@ -1,9 +1,11 @@
+import { fetch } from 'meteor/fetch';
+
 reCAPTCHA = {
     settings: {},
     config: function(settings) {
         return _.extend(this.settings, settings);
     },
-    verifyCaptcha: function(clientIP, response) {
+    verifyCaptcha: async function(clientIP, response) {
         var captcha_data = {
             secret: this.settings.privatekey,
             remoteip: clientIP,
@@ -18,13 +20,22 @@ reCAPTCHA = {
         var success = false; // used to process response string
 
         try {
-            captchaVerificationResult = HTTP.call("POST", "https://www.google.com/recaptcha/api/siteverify", {
-                content: serialized_captcha_data.toString('utf8'),
+            const result = await fetch("https://www.google.com/recaptcha/api/siteverify", {
+                method: 'POST',
+                body: serialized_captcha_data.toString('utf8'),
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
                     'Content-Length': serialized_captcha_data.length
                 }
             });
+            if (result.ok) {
+                captchaVerificationResult = await result.json();
+            }else{
+                return {
+                    'success': false,
+                    'error': 'Service Not Available'
+                };
+            }
         } catch (e) {
             console.log(e);
             return {
@@ -33,14 +44,6 @@ reCAPTCHA = {
             };
         }
 
-        if (!captchaVerificationResult || !captchaVerificationResult.content) {
-            return {
-                'success': false,
-                'error': 'Entered Text Does Not Match'
-            };
-        }
-
-        captchaVerificationResult = EJSON.parse(captchaVerificationResult.content);
         return captchaVerificationResult;
     }
 }

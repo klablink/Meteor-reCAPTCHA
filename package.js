@@ -8,13 +8,13 @@ Package.describe({
 Package.onUse(function(api) {
 
     api.versionsFrom("3.0-beta.0");
-
+    api.use('ecmascript');
     api.use([
         'templating',
         'handlebars',
     ], 'client');
     api.use([
-        'http',
+        'fetch',
     ], 'server');
 
     api.addFiles(['server/server.js'], 'server');
