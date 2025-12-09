@@ -11,7 +11,6 @@ Package.onUse(function(api) {
     api.use('ecmascript');
     api.use([
         'templating',
-        'handlebars',
     ], 'client');
     api.use([
         'fetch',
